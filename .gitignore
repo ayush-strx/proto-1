@@ -134,3 +134,7 @@ __marimo__/
 # Generated audio files (Ayu One project)
 output_*.mp3
 *.mp3
+
+# Model files (too large for Git)
+models/
+*.gguf
