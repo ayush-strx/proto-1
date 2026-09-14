@@ -1,5 +1,4 @@
 import automation.app_launcher as launch
-import utils.time as get_time
 import automation.browser_control as browse
 from voice.tts import speak
 
@@ -52,15 +51,6 @@ def execute_command(command):
         elif command == "open chrome":
             launch.open_chrome()
             speak("Chrome is ready.")
-
-        elif command == "tell me the date":
-            speak(f"Today's date is {get_time.current_date()}.")
-
-        elif command == "tell me the time":
-            speak(f"The current time is {get_time.current_time()}.")
-
-        elif command == "tell me the date and time":
-            speak(f"It's {get_time.date_time()}.")
 
         elif command == "open google":
             speak("Opening Google.")
