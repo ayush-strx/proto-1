@@ -1,18 +1,18 @@
 import automation.app_launcher as launch
 import automation.browser_control as browse
 from voice.tts import speak
-from brain.router import route
+from brain.router import route, chat_response
 import agents.time_agent as time_agent
 import agents.weather_agent as weather_agent
 import agents.wikipedia_agent as wiki_agent
 
+
 def execute_command(command):
     try:
-        decision = route(command)
+        decision, value = route(command)
 
         if decision == "dynamic_open":
-            app_name = command.replace("open", "").strip()
-            speak(launch.find_and_open_app(app_name))
+            speak(launch.find_and_open_app(value))
 
         elif decision == "open_google":
             speak("Opening Google.")
@@ -23,9 +23,8 @@ def execute_command(command):
             browse.youtube()
 
         elif decision == "search":
-            query = command.replace("search", "").strip()
-            speak(f"Searching Google for {query}.")
-            browse.google_search(query)
+            speak(f"Searching Google for {value}.")
+            browse.google_search(value)
 
         elif decision == "time_agent":
             speak(time_agent.get_time())
@@ -34,24 +33,21 @@ def execute_command(command):
             speak(time_agent.get_date())
 
         elif decision == "weather_agent":
-            city = command.replace("weather in", "").replace("weather", "").strip()
-            speak(weather_agent.get_weather(city))
+            speak(weather_agent.get_weather(value))
 
         elif decision == "wikipedia_agent":
-            query = command.replace("tell me about", "").replace("who is", "").replace("what is", "").strip()
-            response = wiki_agent.search_wikipedia(query)
-            print(response)
+            response = wiki_agent.search_wikipedia(value)
+            print(f"Ayu One: {response}")
             speak(response)
+
         else:
-            speak(
-                f"Sorry Sir. I didn't understand that command. "
-                "Type 'help' to see available commands."
-            )
+            response = chat_response(command)
+            print(f"Ayu One: {response}")
+            speak(response)
 
     except FileNotFoundError:
-        speak(f"Sorry Sir!. I couldn't find that application.")
+        speak("Sorry Sir!. I couldn't find that application.")
 
     except Exception as e:
         print(e)
         speak(f"Sorry Sir!. An unexpected error occurred: {e}")
-    
