@@ -1,19 +1,46 @@
 import asyncio
 import edge_tts
-from playsound import playsound
-import uuid
-import os
+import pygame
+from io import BytesIO
 
-async def speak_async(text):
-    voice = "en-US-GuyNeural"
-    filename = f"output_{uuid.uuid4().hex}.mp3"
-    communicate = edge_tts.Communicate(text, voice)
-    await communicate.save(filename)
-    try:
-        playsound(filename)
-    finally:
-        if os.path.exists(filename):
-            os.remove(filename)
+VOICE = "hi-IN-SwaraNeural"
+RATE = "+25%"
+
+pygame.mixer.init()
+
+
+async def generate_audio(text):
+    audio_buffer = BytesIO()
+    communicate = edge_tts.Communicate(text, VOICE, rate=RATE)
+
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            audio_buffer.write(chunk["data"])
+
+    audio_buffer.seek(0)
+    return audio_buffer
+
 
 def speak(text):
-    asyncio.run(speak_async(text))
+    if not text or not text.strip():
+        return
+
+    text = text.replace(",", "")
+    text = text.replace(";", "")
+    text = text.replace(":", "")
+    text = text.replace("!", ".")
+    text = text.replace("?", ".")
+    text = text.replace("--", " ")
+    text = text.replace("—", " ")
+    text = text.replace("...", ".")
+
+    try:
+        audio_buffer = asyncio.run(generate_audio(text))
+        pygame.mixer.music.load(audio_buffer, "mp3")
+        pygame.mixer.music.play()
+
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+
+    except Exception as e:
+        print(f"[TTS Error]: {e}")
